@@ -247,7 +247,7 @@
 </head>
 <body>
 
-    <!-- SCREEN 1: START SCREEN (Innovine Logo ONLY here) -->
+    <!-- SCREEN 1: START SCREEN -->
     <div id="screen-1" class="screen active">
         <div class="card">
             <div class="logo-container">
@@ -275,7 +275,7 @@
             <div class="instruction-box">
                 <strong>नियम:</strong><br>
                 • सही गुब्बारा फोड़ने पर: +10 अंक<br>
-                • गलत गुब्बारा फोड़ने पर: -2 अंक
+                • गलत गुब्बारा फोड़ने पर: -2 अंक (केवल 1 मौका!)
             </div>
             <button class="btn" onclick="startGame()">खेल शुरू करें (Start Game) 🚀</button>
         </div>
@@ -313,61 +313,40 @@
     </div>
 
     <script>
-        // Questions Data
+        // Audio Instances
+        const correctAudio = new Audio('./assets/correct.mp3');
+        const wrongAudio = new Audio('./assets/wrong.mp3');
+        const clapAudio = new Audio('./assets/freesound_community-claps-44774.mp3');
+
+        // Unlock browser audio policy
+        function unlockAudio() {
+            [correctAudio, wrongAudio, clapAudio].forEach(audio => {
+                audio.play().then(() => {
+                    audio.pause();
+                    audio.currentTime = 0;
+                }).catch(() => {});
+            });
+        }
+
+        function playSound(audio) {
+            audio.currentTime = 0;
+            audio.play().catch(e => console.log("Audio Error:", e));
+        }
+
         const level1Questions = [
-            {
-                q: "अंतर्राष्ट्रीय योग दिवस कब मनाया जाता है?",
-                options: ["21 जून", "15 अगस्त", "26 जनवरी", "21 मई"],
-                correct: "21 जून"
-            },
-            {
-                q: "'योग' शब्द संस्कृत के किस शब्द से बना है?",
-                options: ["युज", "योगी", "योग्यता", "युग"],
-                correct: "युज"
-            },
-            {
-                q: "आधुनिक योग का जनक किसे माना जाता है?",
-                options: ["महर्षि पतंजलि", "स्वामी विवेकानंद", "महर्षि वेदव्यास", "गुरु दीपक जी"],
-                correct: "महर्षि पतंजलि"
-            },
-            {
-                q: "पाचन तंत्र के लिए कौन-सा आसन सबसे अच्छा है?",
-                options: ["वज्रासन", "ताड़ासन", "वृक्षासन", "शवासन"],
-                correct: "वज्रासन"
-            },
-            {
-                q: "शरीर में संतुलन लाने वाला आसन कौन-सा है?",
-                options: ["वृक्षासन", "शवासन", "भुजंगासन", "वज्रासन"],
-                correct: "वृक्षासन"
-            }
+            { q: "अंतर्राष्ट्रीय योग दिवस कब मनाया जाता है?", options: ["21 जून", "15 अगस्त", "26 जनवरी", "21 मई"], correct: "21 जून" },
+            { q: "'योग' शब्द संस्कृत के किस शब्द से बना है?", options: ["युज", "योगी", "योग्यता", "युग"], correct: "युज" },
+            { q: "आधुनिक योग का जनक किसे माना जाता है?", options: ["महर्षि पतंजलि", "स्वामी विवेकानंद", "महर्षि वेदव्यास", "गुरु दीपक जी"], correct: "महर्षि पतंजलि" },
+            { q: "पाचन तंत्र के लिए कौन-सा आसन सबसे अच्छा है?", options: ["वज्रासन", "ताड़ासन", "वृक्षासन", "शवासन"], correct: "वज्रासन" },
+            { q: "शरीर में संतुलन लाने वाला आसन कौन-सा है?", options: ["वृक्षासन", "शवासन", "भुजंगासन", "वज्रासन"], correct: "वृक्षासन" }
         ];
 
         const level2Questions = [
-            {
-                q: "'रंग-बिरंगी चटाइयाँ' - इसमें विशेषण शब्द क्या है?",
-                options: ["रंग-बिरंगी", "चटाइयाँ", "बिछी", "हैं"],
-                correct: "रंग-बिरंगी"
-            },
-            {
-                q: "'शांत', 'सुलभ' या 'सुंदर' किस प्रकार के विशेषण हैं?",
-                options: ["गुणवाचक", "संख्यावाचक", "परिमाणवाचक", "सार्वनामिक"],
-                correct: "गुणवाचक"
-            },
-            {
-                q: "'दो बार', 'चार फल' किस विशेषण के उदाहरण हैं?",
-                options: ["संख्यावाचक", "गुणवाचक", "परिमाणवाचक", "सार्वनामिक"],
-                correct: "संख्यावाचक"
-            },
-            {
-                q: "'थोड़ा पानी', 'दो किलो' किस विशेषण के उदाहरण हैं?",
-                options: ["परिमाणवाचक", "संख्यावाचक", "गुणवाचक", "सार्वनामिक"],
-                correct: "परिमाणवाचक"
-            },
-            {
-                q: "'वह लड़का', 'यह किताब' में 'वह' और 'यह' कौन से विशेषण हैं?",
-                options: ["सार्वनामिक", "गुणवाचक", "संख्यावाचक", "परिमाणवाचक"],
-                correct: "सार्वनामिक"
-            }
+            { q: "'रंग-बिरंगी चटाइयाँ' - इसमें विशेषण शब्द क्या है?", options: ["रंग-बिरंगी", "चटाइयाँ", "बिछी", "हैं"], correct: "रंग-बिरंगी" },
+            { q: "'शांत', 'सुलभ' या 'सुंदर' किस प्रकार के विशेषण हैं?", options: ["गुणवाचक", "संख्यावाचक", "परिमाणवाचक", "सार्वनामिक"], correct: "गुणवाचक" },
+            { q: "'दो बार', 'चार फल' किस विशेषण के उदाहरण हैं?", options: ["संख्यावाचक", "गुणवाचक", "परिमाणवाचक", "सार्वनामिक"], correct: "संख्यावाचक" },
+            { q: "'थोड़ा पानी', 'दो किलो' किस विशेषण के उदाहरण हैं?", options: ["परिमाणवाचक", "संख्यावाचक", "गुणवाचक", "सार्वनामिक"], correct: "परिमाणवाचक" },
+            { q: "'वह लड़का', 'यह किताब' में 'वह' और 'यह' कौन से विशेषण हैं?", options: ["सार्वनामिक", "गुणवाचक", "संख्यावाचक", "परिमाणवाचक"], correct: "सार्वनामिक" }
         ];
 
         const colors = ["#FF5733", "#2ECC71", "#3498DB", "#F1C40F", "#9B59B6", "#E67E22"];
@@ -386,11 +365,13 @@
         const levelModal = document.getElementById("level-modal");
 
         function goToScreen(screenNum) {
+            unlockAudio();
             document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
             document.getElementById(`screen-${screenNum}`).classList.add('active');
         }
 
         function startGame() {
+            unlockAudio();
             score = 0;
             currentLevel = 1;
             currentQIndex = 0;
@@ -400,7 +381,7 @@
             levelModal.style.display = "none";
             activeQuestions = level1Questions;
             
-            goToScreen(3); // Game Frame
+            goToScreen(3);
             loadQuestion();
         }
 
@@ -465,6 +446,7 @@
         }
 
         function popBalloon(balloon, selectedText, correctAnswer) {
+            isQuestionTransitioning = true; // Lock further clicks for this question
             balloon.classList.add("pop");
 
             setTimeout(() => {
@@ -472,15 +454,19 @@
             }, 300);
 
             if (selectedText === correctAnswer) {
-                isQuestionTransitioning = true;
+                playSound(correctAudio);
                 score += 10;
                 scoreDisplay.innerText = score;
                 currentQIndex++;
                 clearInterval(balloonInterval);
-                setTimeout(loadQuestion, 600);
+                setTimeout(loadQuestion, 800);
             } else {
+                playSound(wrongAudio);
                 score = Math.max(0, score - 2);
                 scoreDisplay.innerText = score;
+                currentQIndex++; // Move to next question after 1 wrong attempt
+                clearInterval(balloonInterval);
+                setTimeout(loadQuestion, 1000);
             }
         }
 
@@ -491,6 +477,7 @@
 
         function showLevelTransition() {
             clearBalloons();
+            playSound(clapAudio);
             levelModal.style.display = "block";
         }
 
@@ -505,8 +492,9 @@
 
         function endGame() {
             clearBalloons();
+            playSound(clapAudio);
             document.getElementById("final-score").innerText = `आपका कुल अंक: ${score}`;
-            goToScreen(4); // Closing Screen
+            goToScreen(4);
         }
 
         function restartGame() {
