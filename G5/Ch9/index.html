@@ -247,7 +247,7 @@
 </head>
 <body>
 
-    <!-- SCREEN 1: START SCREEN (Innovine Logo ONLY here) -->
+    <!-- SCREEN 1: START SCREEN -->
     <div id="screen-1" class="screen active">
         <div class="card">
             <div class="logo-container">
@@ -275,7 +275,7 @@
             <div class="instruction-box">
                 <strong>नियम:</strong><br>
                 • सही गुब्बारा फोड़ने पर: +10 अंक<br>
-                • गलत गुब्बारा फोड़ने पर: -2 अंक
+                • गलत गुब्बारा फोड़ने पर: -2 अंक (केवल 1 मौका!)
             </div>
             <button class="btn" onclick="startGame()">खेल शुरू करें (Start Game) 🚀</button>
         </div>
@@ -313,6 +313,17 @@
     </div>
 
     <script>
+        // Audio Objects setup
+        const correctSound = new Audio('assets/correct.mp3');
+        const wrongSound = new Audio('assets/wrong.mp3');
+        const clapSound = new Audio('assets/freesound_community-claps-44774.mp3');
+
+        // Audio play function helper with error handling
+        function playAudio(audioObj) {
+            audioObj.currentTime = 0;
+            audioObj.play().catch(e => console.log("Audio play blocked by browser:", e));
+        }
+
         // Questions Data
         const level1Questions = [
             {
@@ -472,6 +483,8 @@
             }, 300);
 
             if (selectedText === correctAnswer) {
+                // Correct answer selected
+                playAudio(correctSound);
                 isQuestionTransitioning = true;
                 score += 10;
                 scoreDisplay.innerText = score;
@@ -479,8 +492,14 @@
                 clearInterval(balloonInterval);
                 setTimeout(loadQuestion, 600);
             } else {
+                // Wrong answer selected - Only 1 attempt allowed!
+                playAudio(wrongSound);
+                isQuestionTransitioning = true; // Stop user from clicking again for this question
                 score = Math.max(0, score - 2);
                 scoreDisplay.innerText = score;
+                currentQIndex++;
+                clearInterval(balloonInterval);
+                setTimeout(loadQuestion, 800); // Move to next question after wrong sound
             }
         }
 
@@ -491,6 +510,7 @@
 
         function showLevelTransition() {
             clearBalloons();
+            playAudio(clapSound);
             levelModal.style.display = "block";
         }
 
@@ -505,6 +525,7 @@
 
         function endGame() {
             clearBalloons();
+            playAudio(clapSound);
             document.getElementById("final-score").innerText = `आपका कुल अंक: ${score}`;
             goToScreen(4); // Closing Screen
         }
