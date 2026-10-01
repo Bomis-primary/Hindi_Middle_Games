@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>अध्याय 14: कबड्डी - 4 Screen Game</title>
+  <title>अध्याय 14: कबड्डी</title>
   <style>
     * {
       box-sizing: border-box;
@@ -46,7 +46,7 @@
       display: block;
     }
 
-    /* SCREEN 1: LOGO ONLY */
+    /* SCREEN 1: ONLY LOGO & NEXT BUTTON */
     #screen-1 {
       text-align: center;
     }
@@ -56,28 +56,32 @@
       justify-content: center;
       align-items: center;
       margin-bottom: 25px;
+      padding: 30px 0;
     }
 
     .brand-logo {
-      max-width: 220px;
+      max-width: 260px;
+      width: 85%;
       height: auto;
       object-fit: contain;
-      filter: drop-shadow(0px 4px 8px rgba(52, 211, 153, 0.3));
+      filter: drop-shadow(0px 4px 10px rgba(52, 211, 153, 0.4));
     }
 
+    /* SCREEN 2: TOPIC & INSTRUCTIONS */
     .main-title {
       color: #6ee7b7;
       font-size: 1.8rem;
-      margin-bottom: 10px;
+      margin-bottom: 8px;
+      text-align: center;
     }
 
     .sub-title {
       color: #a7f3d0;
       font-size: 1rem;
-      margin-bottom: 30px;
+      margin-bottom: 20px;
+      text-align: center;
     }
 
-    /* SCREEN 2: INSTRUCTIONS */
     .intro-box {
       text-align: center;
       line-height: 1.6;
@@ -85,17 +89,18 @@
 
     .intro-box h2 {
       color: #fde047;
-      margin-bottom: 16px;
-      font-size: 1.5rem;
+      margin-bottom: 14px;
+      font-size: 1.3rem;
     }
 
     .level-desc {
       background: #022c22;
-      padding: 14px;
+      padding: 12px 14px;
       border-radius: 8px;
-      margin: 12px 0;
+      margin: 10px 0;
       text-align: left;
       border-left: 4px solid #fde047;
+      font-size: 0.95rem;
     }
 
     .level-desc strong {
@@ -143,9 +148,14 @@
       transition: all 0.2s ease;
     }
 
-    .opt-btn:hover {
+    .opt-btn:hover:not(:disabled) {
       background: #059669;
       border-color: #fde047;
+    }
+
+    .opt-btn:disabled {
+      cursor: not-allowed;
+      opacity: 0.6;
     }
 
     .feedback {
@@ -156,7 +166,7 @@
       text-align: center;
     }
 
-    /* Level 3 Canvas Styling */
+    /* Level 3 Canvas */
     #canvas-container {
       display: flex;
       flex-direction: column;
@@ -208,21 +218,22 @@
 
   <div id="game-card">
 
-    <!-- SCREEN 1: LOGO ONLY -->
+    <!-- SCREEN 1: ONLY LOGO -->
     <div id="screen-1" class="screen active">
       <div class="logo-container">
         <img src="assets/logo.png" alt="Innovine Logo" class="brand-logo" onerror="this.style.display='none'; document.getElementById('alt-logo').style.display='block';">
         <h1 id="alt-logo" style="display:none; color:#34d399; font-size:2.5rem;">INNOVINE</h1>
       </div>
-      <h1 class="main-title">🤼‍♂️ पाठ 14: कबड्डी 🏆</h1>
-      <p class="sub-title">कविता बोध, मुहावरे एवं रेडर चैलेंज - 3 स्तर का खेल</p>
       <div class="btn-container">
         <button class="btn" onclick="goToScreen(2)">आगे बढ़ें ➔</button>
       </div>
     </div>
 
-    <!-- SCREEN 2: INSTRUCTIONS SCREEN -->
+    <!-- SCREEN 2: TOPIC NAME & INSTRUCTIONS -->
     <div id="screen-2" class="screen intro-box">
+      <h1 class="main-title">🤼‍♂️ पाठ 14: कबड्डी 🏆</h1>
+      <p class="sub-title">कविता बोध, मुहावरे एवं रेडर चैलेंज - 3 स्तर का खेल</p>
+
       <h2>📋 खेल के निर्देश (Instructions)</h2>
       <div class="level-desc">
         <strong>स्तर 1: कविता एवं खेल बोध (Poem & Vocabulary)</strong><br>
@@ -278,65 +289,13 @@
   </div>
 
   <script>
-    // Web Audio API Sound Effects
-    let audioCtx = null;
+    // Asset Audio Elements
+    const correctSound = new Audio('assets/freesound_community-claps-44774.mp3');
+    const wrongSound = new Audio('assets/wrong.mp3');
 
-    function initAudio() {
-      if (!audioCtx) {
-        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-      }
-    }
-
-    function playSound(type) {
-      initAudio();
-      if (!audioCtx) return;
-
-      const osc = audioCtx.createOscillator();
-      const gain = audioCtx.createGain();
-      osc.connect(gain);
-      gain.connect(audioCtx.destination);
-
-      const now = audioCtx.currentTime;
-
-      if (type === 'correct') {
-        osc.type = 'sine';
-        osc.frequency.setValueAtTime(523.25, now);
-        osc.frequency.exponentialRampToValueAtTime(880, now + 0.3);
-        gain.gain.setValueAtTime(0.3, now);
-        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
-        osc.start(now);
-        osc.stop(now + 0.3);
-      } else if (type === 'wrong') {
-        osc.type = 'sawtooth';
-        osc.frequency.setValueAtTime(150, now);
-        osc.frequency.linearRampToValueAtTime(100, now + 0.3);
-        gain.gain.setValueAtTime(0.3, now);
-        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
-        osc.start(now);
-        osc.stop(now + 0.3);
-      } else if (type === 'click') {
-        osc.type = 'triangle';
-        osc.frequency.setValueAtTime(400, now);
-        gain.gain.setValueAtTime(0.1, now);
-        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.05);
-        osc.start(now);
-        osc.stop(now + 0.05);
-      } else if (type === 'win') {
-        [261.63, 329.63, 392.00, 523.25].forEach((freq, idx) => {
-          const noteOsc = audioCtx.createOscillator();
-          const noteGain = audioCtx.createGain();
-          noteOsc.connect(noteGain);
-          noteOsc.connect(audioCtx.destination);
-          
-          noteOsc.type = 'sine';
-          noteOsc.frequency.setValueAtTime(freq, now + idx * 0.1);
-          noteGain.gain.setValueAtTime(0.2, now + idx * 0.1);
-          noteGain.gain.exponentialRampToValueAtTime(0.01, now + idx * 0.1 + 0.25);
-          
-          noteOsc.start(now + idx * 0.1);
-          noteOsc.stop(now + idx * 0.1 + 0.25);
-        });
-      }
+    function playAudio(sound) {
+      sound.currentTime = 0;
+      sound.play().catch(e => console.log("Audio play error:", e));
     }
 
     // LEVEL 1: POEM & KABADDI KNOWLEDGE
@@ -404,7 +363,6 @@
 
     // SCREEN NAVIGATION FUNCTION
     function goToScreen(screenNumber) {
-      playSound('click');
       document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
       document.getElementById(`screen-${screenNumber}`).classList.add('active');
     }
@@ -416,7 +374,7 @@
       document.getElementById('level-num').innerText = currentLevel;
       document.getElementById('score-num').innerText = score;
 
-      goToScreen(3); // Navigate to Screen 3 (Game Play)
+      goToScreen(3); // Screen 3 for gameplay
 
       if (lvl === 1 || lvl === 2) {
         document.getElementById('quiz-container').style.display = 'block';
@@ -442,53 +400,56 @@
         const btn = document.createElement('button');
         btn.className = 'opt-btn';
         btn.innerText = opt;
-        btn.onclick = () => selectOption(idx);
+        btn.onclick = () => selectOption(idx, btn);
         container.appendChild(btn);
       });
     }
 
-    function selectOption(selectedIdx) {
+    function selectOption(selectedIdx, selectedBtn) {
       const q = currentQuestions[currentQIndex];
       const feedback = document.getElementById('feedback-msg');
-      const btns = document.querySelectorAll('.opt-btn');
-
-      btns.forEach(b => b.style.pointerEvents = 'none');
 
       if (selectedIdx === q.ans) {
-        playSound('correct');
+        playAudio(correctSound);
         feedback.style.color = '#6ee7b7';
         feedback.innerText = '✓ शाबाश! बिल्कुल सही उत्तर।';
-        btns[selectedIdx].style.background = '#065f46';
-        btns[selectedIdx].style.borderColor = '#6ee7b7';
+        
+        selectedBtn.style.background = '#065f46';
+        selectedBtn.style.borderColor = '#6ee7b7';
+        
+        // Disable all buttons after correct answer
+        document.querySelectorAll('.opt-btn').forEach(b => b.style.pointerEvents = 'none');
+        
         score += 10;
         document.getElementById('score-num').innerText = score;
-      } else {
-        playSound('wrong');
-        feedback.style.color = '#f87171';
-        feedback.innerText = `✗ गलत उत्तर! सही उत्तर था: ${q.opts[q.ans]}`;
-        btns[selectedIdx].style.background = '#991b1b';
-        btns[q.ans].style.background = '#065f46';
-      }
 
-      setTimeout(() => {
-        currentQIndex++;
-        if (currentQIndex < currentQuestions.length) {
-          loadQuestion();
-        } else {
-          finishLevel();
-        }
-      }, 1800);
+        setTimeout(() => {
+          currentQIndex++;
+          if (currentQIndex < currentQuestions.length) {
+            loadQuestion();
+          } else {
+            finishLevel();
+          }
+        }, 1400);
+
+      } else {
+        // WRONG ANSWER: DO NOT SHOW CORRECT ANSWER. ASK TO TRY AGAIN.
+        playAudio(wrongSound);
+        feedback.style.color = '#f87171';
+        feedback.innerText = '✗ गलत उत्तर! फिर से कोशिश करो।';
+        
+        selectedBtn.style.background = '#991b1b';
+        selectedBtn.style.borderColor = '#ef4444';
+        selectedBtn.disabled = true; // Disable only the clicked wrong button
+      }
     }
 
-    // LEVEL 3: KABADDI CANVAS RAID GAME
-    let raidStep = 0; // 0: Touch Bonus, 1: Touch Defender, 2: Return to Safe Line
+    // LEVEL 3: KABADDI CANVAS GAME
+    let raidStep = 0;
     function initKabaddiGame() {
       raidStep = 0;
       document.getElementById('raid-feedback').innerText = '';
-      document.getElementById('raid-instruction').innerText = '1. बोनस अंक पाने के लिए चमकती हुई पीली लाइन पर क्लिक करें!';
-      
-      const canvas = document.getElementById('kabaddiCanvas');
-      canvas.onclick = handleRaidClick;
+      document.getElementById('raid-instruction').innerText = '1. बोनस अंक पाने के लिए चमकती हुई पीली रेखा पर क्लिक करें!';
       drawKabaddiCourt();
     }
 
@@ -497,7 +458,7 @@
       const ctx = canvas.getContext('2d');
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-      // Midline (Safe Zone)
+      // Midline
       ctx.strokeStyle = '#34d399';
       ctx.lineWidth = 5;
       ctx.beginPath();
@@ -528,7 +489,7 @@
       ctx.fillStyle = (raidStep === 0) ? '#fde047' : '#94a3b8';
       ctx.fillText('★ बोनस रेखा (Bonus Line)', 95, 220);
 
-      // Defender Target
+      // Defender
       if (raidStep >= 1) {
         ctx.beginPath();
         ctx.arc(170, 280, 20, 0, Math.PI * 2);
@@ -541,57 +502,55 @@
       }
     }
 
-    function handleRaidClick(e) {
-      const canvas = document.getElementById('kabaddiCanvas');
+    const canvas = document.getElementById('kabaddiCanvas');
+    canvas.onclick = function(e) {
       const rect = canvas.getBoundingClientRect();
       const clickY = e.clientY - rect.top;
 
       if (raidStep === 0) {
         if (clickY >= 210 && clickY <= 250) {
-          playSound('correct');
+          playAudio(correctSound);
           raidStep = 1;
           score += 10;
           document.getElementById('score-num').innerText = score;
           document.getElementById('raid-instruction').innerText = '2. शाबाश! अब विपक्षी खिलाड़ी (लाल चक्र) को छूकर अंक प्राप्त करें!';
           drawKabaddiCourt();
         } else {
-          playSound('wrong');
-          document.getElementById('raid-feedback').innerText = '✗ गलत जगह! बोनस रेखा (पीली रेखा) पर टैप करें।';
-          setTimeout(() => document.getElementById('raid-feedback').innerText = '', 1200);
+          playAudio(wrongSound);
+          document.getElementById('raid-feedback').style.color = '#f87171';
+          document.getElementById('raid-feedback').innerText = '✗ गलत जगह! फिर से कोशिश करो।';
         }
       } else if (raidStep === 1) {
         if (clickY >= 250 && clickY <= 310) {
-          playSound('correct');
+          playAudio(correctSound);
           raidStep = 2;
           score += 10;
           document.getElementById('score-num').innerText = score;
-          document.getElementById('raid-instruction').innerText = '3. बेहतरीन! अब जल्दी से वापस हरी मध्य रेखा (सुरक्षित क्षेत्र) पर क्लिक करें!';
+          document.getElementById('raid-instruction').innerText = '3. बेहतरीन! अब जल्दी से वापस हरी मध्य रेखा पर क्लिक करें!';
           drawKabaddiCourt();
         } else {
-          playSound('wrong');
-          document.getElementById('raid-feedback').innerText = '✗ ध्यान से! लाल चक्र (विपक्षी) पर क्लिक करें।';
-          setTimeout(() => document.getElementById('raid-feedback').innerText = '', 1200);
+          playAudio(wrongSound);
+          document.getElementById('raid-feedback').style.color = '#f87171';
+          document.getElementById('raid-feedback').innerText = '✗ गलत जगह! फिर से कोशिश करो।';
         }
       } else if (raidStep === 2) {
         if (clickY <= 70) {
-          playSound('win');
+          playAudio(correctSound);
           score += 10;
           document.getElementById('score-num').innerText = score;
           document.getElementById('raid-instruction').innerText = '🎉 शानदार रेड! आप सुरक्षित वापस पहुँच गए!';
-          setTimeout(() => {
-            finishLevel();
-          }, 1500);
+          setTimeout(() => finishLevel(), 1500);
         } else {
-          playSound('wrong');
-          document.getElementById('raid-feedback').innerText = '✗ जल्दी भागिए! सबसे ऊपर हरी मध्य रेखा पर क्लिक करें!';
-          setTimeout(() => document.getElementById('raid-feedback').innerText = '', 1200);
+          playAudio(wrongSound);
+          document.getElementById('raid-feedback').style.color = '#f87171';
+          document.getElementById('raid-feedback').innerText = '✗ गलत जगह! फिर से कोशिश करो।';
         }
       }
-    }
+    };
 
     function finishLevel() {
-      playSound('win');
-      goToScreen(4); // Navigate to Screen 4 (End Screen)
+      playAudio(correctSound);
+      goToScreen(4);
 
       const title = document.getElementById('end-title');
       const desc = document.getElementById('end-desc');
@@ -599,16 +558,16 @@
 
       if (currentLevel === 1) {
         title.innerText = '🤼‍♂️ स्तर 1 पूर्ण!';
-        desc.innerText = `उत्कृष्ट! आपने कबड्डी कविता और शब्दावली से जुड़े प्रश्नों के सही उत्तर दिए। आपका स्कोर: ${score}`;
-        btn.innerText = 'स्तर 2 (मुहावरे और लोकोक्तियाँ) प्रारंभ करें';
+        desc.innerText = `उत्कृष्ट! आपने कबड्डी कविता और शब्दावली के सभी प्रश्नों के सही उत्तर दिए। स्कोर: ${score}`;
+        btn.innerText = 'स्तर 2 (व्याकरण अभ्यास) प्रारंभ करें';
       } else if (currentLevel === 2) {
         title.innerText = '📝 स्तर 2 पूर्ण!';
-        desc.innerText = `शानदार! आपने मुहावरे और लोकोक्तियों के सभी उत्तर सही दिए। आपका स्कोर: ${score}`;
+        desc.innerText = `शानदार! आपने मुहावरे और लोकोक्तियों के सभी उत्तर सही दिए। स्कोर: ${score}`;
         btn.innerText = 'स्तर 3 (रेडर का छापा) प्रारंभ करें';
       } else {
         const maxScore = (level1Data.length + level2Data.length) * 10 + 30;
         title.innerText = '🏆 बधाई हो! खेल समाप्त';
-        desc.innerText = `अद्भुत प्रदर्शन! आपने कविता बोध, व्याकरण और कबड्डी खेल (Raid Challenge) तीनों स्तर सफलता से पूर्ण कर लिए हैं। अंतिम स्कोर: ${score}/${maxScore}`;
+        desc.innerText = `अद्भुत प्रदर्शन! आपने तीनों स्तर पूर्ण कर लिए हैं। अंतिम स्कोर: ${score}/${maxScore}`;
         btn.innerText = 'पुनः खेलें (Play Again)';
       }
     }
@@ -620,7 +579,7 @@
         startLevel(3);
       } else {
         score = 0;
-        goToScreen(1); // Return to Screen 1
+        goToScreen(1);
       }
     }
   </script>
